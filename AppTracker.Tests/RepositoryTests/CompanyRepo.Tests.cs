@@ -1,10 +1,5 @@
 ﻿using System;
 using Xunit;
-using Moq;
-using AppTracker.Models.Repositories.Interfaces;
-using AppTracker.Models.DTO;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using AppTracker.Models.Repositories;
 using AppTracker.Models.DB;
 
