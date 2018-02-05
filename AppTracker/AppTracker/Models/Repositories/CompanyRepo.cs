@@ -81,8 +81,8 @@ namespace AppTracker.Models.Repositories
         
         public CompanyDTO DeleteCompany(int companyId)
         {
-
             var company = _context.Company.SingleOrDefault(m => m.Id == companyId);
+
             if (company == null)
             {
                 return null;

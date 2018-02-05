@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.DB;
+using AppTracker.Models.Repositories.Interfaces;
+using AppTracker.Models.DTO;
 
 namespace AppTracker.Controllers
 {
@@ -13,30 +15,31 @@ namespace AppTracker.Controllers
     [Route("api/Contacts")]
     public class ContactsController : Controller
     {
-        private readonly AppTrackerDBContext _context;
+        private readonly IContactRepo _contactRepo;
 
-        public ContactsController(AppTrackerDBContext context)
+        public ContactsController(IContactRepo contactRepo)
         {
-            _context = context;
+            _contactRepo = contactRepo;
         }
 
         // GET: api/Contacts
         [HttpGet]
-        public IEnumerable<Contact> GetContact()
+        public IEnumerable<ContactDTO> GetContact()
         {
-            return _context.Contact;
+            return _contactRepo.GetAll();
         }
 
         // GET: api/Contacts/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetContact([FromRoute] int id)
+        public IActionResult GetContact([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var contact = await _context.Contact.SingleOrDefaultAsync(m => m.Id == id);
+            var contact = _contactRepo.GetId(id);
+
 
             if (contact == null)
             {
@@ -48,7 +51,7 @@ namespace AppTracker.Controllers
 
         // PUT: api/Contacts/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutContact([FromRoute] int id, [FromBody] Contact contact)
+        public IActionResult PutContact([FromRoute] int id, [FromBody] Contact contact)
         {
             if (!ModelState.IsValid)
             {
@@ -60,22 +63,9 @@ namespace AppTracker.Controllers
                 return BadRequest();
             }
 
-            _context.Entry(contact).State = EntityState.Modified;
-
-            try
+            if (!_contactRepo.EditContact(id, contact)) 
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ContactExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return NotFound();
             }
 
             return NoContent();
@@ -83,43 +73,40 @@ namespace AppTracker.Controllers
 
         // POST: api/Contacts
         [HttpPost]
-        public async Task<IActionResult> PostContact([FromBody] Contact contact)
+        public IActionResult PostContact([FromBody] Contact contact)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Contact.Add(contact);
-            await _context.SaveChangesAsync();
+            var contactDto = _contactRepo.CreateContact(contact);
 
-            return CreatedAtAction("GetContact", new { id = contact.Id }, contact);
+            if (contactDto == null)
+            {
+                return BadRequest();
+            }
+
+            return CreatedAtAction("GetContact", new { id = contact.Id }, contactDto);
         }
 
         // DELETE: api/Contacts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteContact([FromRoute] int id)
+        public IActionResult DeleteContact([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var contact = await _context.Contact.SingleOrDefaultAsync(m => m.Id == id);
-            if (contact == null)
-            {
-                return NotFound();
-            }
+            var removed = _contactRepo.DeleteContact(id);
 
-            _context.Contact.Remove(contact);
-            await _context.SaveChangesAsync();
-
-            return Ok(contact);
+            return (removed == null) ? (IActionResult)NotFound() : Ok(removed);
         }
 
         private bool ContactExists(int id)
         {
-            return _context.Contact.Any(e => e.Id == id);
+            return _contactRepo.ContactExists(id);
         }
     }
 }
