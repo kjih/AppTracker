@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.DB;
+using AppTracker.Models.Repositories.Interfaces;
+using AppTracker.Models.DTO;
 
 namespace AppTracker.Controllers
 {
@@ -13,30 +14,30 @@ namespace AppTracker.Controllers
     [Route("api/Applications")]
     public class ApplicationsController : Controller
     {
-        private readonly AppTrackerDBContext _context;
+        private readonly IApplicationRepo _appRepo;
 
-        public ApplicationsController(AppTrackerDBContext context)
+        public ApplicationsController(IApplicationRepo appRepo)
         {
-            _context = context;
+            _appRepo = appRepo;
         }
 
         // GET: api/Applications
         [HttpGet]
-        public IEnumerable<Application> GetApplication()
+        public IEnumerable<ApplicationDTO> GetApplication()
         {
-            return _context.Application;
+            return _appRepo.GetAll();
         }
 
         // GET: api/Applications/5
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetApplication([FromRoute] int id)
+        public IActionResult GetApplication([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var application = await _context.Application.SingleOrDefaultAsync(m => m.Id == id);
+            var application = _appRepo.GetId(id);
 
             if (application == null)
             {
@@ -48,34 +49,21 @@ namespace AppTracker.Controllers
 
         // PUT: api/Applications/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutApplication([FromRoute] int id, [FromBody] Application application)
+        public IActionResult PutApplication([FromRoute] int id, [FromBody] Application application)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            if (id != application.Id)
+            if (!_appRepo.ApplicationExists(id))
+            {
+                return NotFound();
+            }
+
+            if (!_appRepo.EditApplication(id, application))
             {
                 return BadRequest();
-            }
-
-            _context.Entry(application).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ApplicationExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
@@ -83,43 +71,45 @@ namespace AppTracker.Controllers
 
         // POST: api/Applications
         [HttpPost]
-        public async Task<IActionResult> PostApplication([FromBody] Application application)
+        public IActionResult PostApplication([FromBody] Application application)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            _context.Application.Add(application);
-            await _context.SaveChangesAsync();
+            var result = _appRepo.CreateApplication(application);
 
-            return CreatedAtAction("GetApplication", new { id = application.Id }, application);
+            if (result == null)
+            {
+                return BadRequest();
+            }
+
+            return CreatedAtAction("GetApplication", new { id = result.Id }, result);
         }
 
         // DELETE: api/Applications/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteApplication([FromRoute] int id)
+        public IActionResult DeleteApplication([FromRoute] int id)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var application = await _context.Application.SingleOrDefaultAsync(m => m.Id == id);
-            if (application == null)
+            var result = _appRepo.DeleteApplication(id);
+
+            if (result == null)
             {
                 return NotFound();
             }
 
-            _context.Application.Remove(application);
-            await _context.SaveChangesAsync();
-
-            return Ok(application);
+            return Ok(result);
         }
 
         private bool ApplicationExists(int id)
         {
-            return _context.Application.Any(e => e.Id == id);
+            return _appRepo.ApplicationExists(id);
         }
     }
 }

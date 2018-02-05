@@ -56,8 +56,15 @@ namespace AppTracker.Models.Repositories
                 return null;
             }
 
-            _context.Contact.Add(contact);
-            _context.SaveChanges();
+            try
+            {
+                _context.Contact.Add(contact);
+                _context.SaveChanges();
+            }
+            catch
+            {
+                return null;
+            }
 
             return toContactDTO(contact);
         }
