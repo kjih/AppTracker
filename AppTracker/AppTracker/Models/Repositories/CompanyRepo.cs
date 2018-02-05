@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace AppTracker.Models.Repositories
 {
@@ -47,6 +46,11 @@ namespace AppTracker.Models.Repositories
 
         public CompanyDTO CreateCompany(Company company)
         {
+            if (string.IsNullOrWhiteSpace(company.Name))
+            {
+                return null;
+            }
+
             _context.Company.Add(company);
             _context.SaveChanges();
 
@@ -55,7 +59,7 @@ namespace AppTracker.Models.Repositories
 
         public bool EditCompany(int companyId, Company company)
         {
-            if (companyId != company.Id)
+            if (companyId != company.Id || string.IsNullOrWhiteSpace(company.Name))
             {
                 return false;
             }

@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.DB;
 using AppTracker.Models.DTO;
-using AppTracker.Models.Repositories;
+using AppTracker.Models.Repositories.Interfaces;
 
 namespace AppTracker.Controllers
 {
@@ -15,10 +10,10 @@ namespace AppTracker.Controllers
     [Route("api/Companies")]
     public class CompaniesController : Controller
     {
-        private readonly CompanyRepo _companyRepo;
-        private readonly ContactRepo _contactRepo;
+        private readonly ICompanyRepo _companyRepo;
+        private readonly IContactRepo _contactRepo;
 
-        public CompaniesController(CompanyRepo companyRepo, ContactRepo contactRepo)
+        public CompaniesController(ICompanyRepo companyRepo, IContactRepo contactRepo)
         {
             _companyRepo = companyRepo;
             _contactRepo = contactRepo;
@@ -101,6 +96,11 @@ namespace AppTracker.Controllers
             }
 
             var companyDto = _companyRepo.CreateCompany(company);
+
+            if (companyDto == null)
+            {
+                return BadRequest();
+            }
 
             return CreatedAtAction("GetCompany", new { id = company.Id }, companyDto);
         }

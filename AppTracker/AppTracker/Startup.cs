@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using AppTracker.Models;
 using AppTracker.Models.DB;
 using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.Repositories;
+using AppTracker.Models.Repositories.Interfaces;
 
 namespace AppTracker
 {
@@ -32,8 +26,8 @@ namespace AppTracker
                 options.UseSqlServer(Configuration.GetConnectionString("AppTrackerDB")));
 
             // Repositories
-            services.AddTransient<ContactRepo>();
-            services.AddTransient<CompanyRepo>();
+            services.AddTransient<IContactRepo, ContactRepo>();
+            services.AddTransient<ICompanyRepo, CompanyRepo>();
 
             services.AddMvc();
         }
