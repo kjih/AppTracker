@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 using AppTracker.Models;
 using AppTracker.Models.DB;
 using Microsoft.EntityFrameworkCore;
+using AppTracker.Models.Repositories;
 
 namespace AppTracker
 {
@@ -29,6 +30,10 @@ namespace AppTracker
             // EF DB Setup
             services.AddDbContext<AppTrackerDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AppTrackerDB")));
+
+            // Repositories
+            services.AddTransient<ContactRepo>();
+            services.AddTransient<CompanyRepo>();
 
             services.AddMvc();
         }
