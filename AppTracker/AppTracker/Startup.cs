@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using AppTracker.Models;
+using AppTracker.Models.DB;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppTracker
 {
@@ -23,6 +26,10 @@ namespace AppTracker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            // EF DB Setup
+            services.AddDbContext<AppTrackerDBContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("AppTrackerDB")));
+
             services.AddMvc();
         }
 

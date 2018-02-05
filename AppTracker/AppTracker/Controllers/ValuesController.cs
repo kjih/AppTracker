@@ -3,17 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using AppTracker.Models.DB;
 
 namespace AppTracker.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
+        private readonly AppTrackerDBContext _context;
+
+        public ValuesController(AppTrackerDBContext context)
+        {
+            _context = context;
+        }
+
         // GET api/values
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            string value = _context.Company.FirstOrDefault(x => 1 == 1).Name;
+
+            return new string[] { value };
+            //return new string[] { "value1", "value2" };
         }
 
         // GET api/values/5
