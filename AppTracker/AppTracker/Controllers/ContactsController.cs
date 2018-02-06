@@ -103,10 +103,5 @@ namespace AppTracker.Controllers
 
             return (removed == null) ? (IActionResult)NotFound() : Ok(removed);
         }
-
-        private bool ContactExists(int id)
-        {
-            return _contactRepo.ContactExists(id);
-        }
     }
 }

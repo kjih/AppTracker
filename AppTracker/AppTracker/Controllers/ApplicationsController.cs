@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.DB;
 using AppTracker.Models.Repositories.Interfaces;
 using AppTracker.Models.DTO;
@@ -15,10 +11,12 @@ namespace AppTracker.Controllers
     public class ApplicationsController : Controller
     {
         private readonly IApplicationRepo _appRepo;
+        private readonly IContactRepo _contactRepo;
 
-        public ApplicationsController(IApplicationRepo appRepo)
+        public ApplicationsController(IApplicationRepo appRepo, IContactRepo contactRepo)
         {
             _appRepo = appRepo;
+            _contactRepo = contactRepo;
         }
 
         // GET: api/Applications
@@ -107,9 +105,41 @@ namespace AppTracker.Controllers
             return Ok(result);
         }
 
-        private bool ApplicationExists(int id)
+        #region Application Contact References
+        [HttpGet("{id}/contacts")]
+        public IActionResult GetApplicationContacts([FromRoute] int id)
         {
-            return _appRepo.ApplicationExists(id);
+            if (!_appRepo.ApplicationExists(id))
+            {
+                return NotFound();
+            }
+
+            var appContacts = _contactRepo.GetContactsByApplication(id);
+
+            return Ok(appContacts);
         }
+
+        [HttpPut("{appId}/contacts/{contactId}")]
+        public IActionResult AddApplicationContactReference([FromRoute] int appId, [FromRoute] int contactId)
+        {
+            if (!_contactRepo.AddApplicationContactReference(appId, contactId))
+            {
+                return BadRequest();
+            }
+
+            return NoContent();
+        }
+
+        [HttpDelete("{appId}/contacts/{contactId}")]
+        public IActionResult DeleteApplicationContactReference([FromRoute] int appId, [FromRoute] int contactId)
+        {
+            if (!_contactRepo.DeleteApplictaionContactReference(appId, contactId))
+            {
+                return BadRequest();
+            }
+
+            return Ok();
+        } 
+        #endregion
     }
 }

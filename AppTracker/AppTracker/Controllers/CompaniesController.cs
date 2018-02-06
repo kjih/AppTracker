@@ -118,10 +118,5 @@ namespace AppTracker.Controllers
 
             return (removed == null) ? (IActionResult) NotFound() : Ok(removed);
         }
-
-        private bool CompanyExists(int id)
-        {
-            return _companyRepo.CompanyExists(id);
-        }
     }
 }

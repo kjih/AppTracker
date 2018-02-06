@@ -36,6 +36,26 @@ namespace AppTracker.Models.Repositories
             return contacts;
         }
 
+        public IEnumerable<ContactDTO> GetContactsByApplication(int applicationId)
+        {
+            var contacts = (from x in _context.ApplicationContactXref
+                            join c in _context.Contact on x.ContactId equals c.Id
+                            where x.ApplicationId == applicationId
+                            select new ContactDTO
+                            {
+                                Id = c.Id,
+                                CompanyId = c.CompanyId,
+                                FirstName = c.FirstName,
+                                LastName = c.LastName,
+                                Phone = c.Phone,
+                                Email = c.Email,
+                                Role = c.Role,
+                                Notes = c.Notes
+                            });
+
+            return contacts;
+        }
+
         public IEnumerable<ContactDTO> GetAll()
         {
             return _context.Contact.Select(toContactDTO);
@@ -111,6 +131,52 @@ namespace AppTracker.Models.Repositories
         public bool ContactExists(int contactId)
         {
             return _context.Contact.Any(e => e.Id == contactId);
+        }
+
+        public bool AddApplicationContactReference(int appId, int contactId)
+        {
+            var reference = _context.ApplicationContactXref
+                                   .SingleOrDefault(a => a.ApplicationId == appId && a.ContactId == contactId);
+
+            if (reference == null)
+            {
+                reference = new ApplicationContactXref()
+                {
+                    ApplicationId = appId,
+                    ContactId = contactId
+                };
+
+                _context.ApplicationContactXref
+                        .Add(reference);
+
+                try
+                {
+                    _context.SaveChanges();
+                }
+                catch (Exception e)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public bool DeleteApplictaionContactReference(int appId, int contactId)
+        {
+            var reference = _context.ApplicationContactXref
+                                    .SingleOrDefault(x => x.ApplicationId == appId 
+                                                     && x.ContactId == contactId);
+
+            if (reference == null)
+            {
+                return false;
+            }
+
+            _context.ApplicationContactXref.Remove(reference);
+            _context.SaveChanges();
+
+            return true;
         }
     }
 }
