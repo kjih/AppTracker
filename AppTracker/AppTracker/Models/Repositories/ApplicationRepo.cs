@@ -114,7 +114,7 @@ namespace AppTracker.Models.Repositories
                          group a by a.Id into g
                          select new { ApplicationId = g.Key }).Count();
 
-            return count;
+            return GetTotalAppCount() - count;
         }
     }
 }
