@@ -136,7 +136,7 @@ namespace AppTracker.Models.Repositories
         public bool AddApplicationContactReference(int appId, int contactId)
         {
             var reference = _context.ApplicationContactXref
-                                   .SingleOrDefault(a => a.ApplicationId == appId && a.ContactId == contactId);
+                                    .FirstOrDefault(a => a.ApplicationId == appId && a.ContactId == contactId);
 
             if (reference == null)
             {

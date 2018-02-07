@@ -29,6 +29,7 @@ namespace AppTracker
             services.AddTransient<IContactRepo, ContactRepo>();
             services.AddTransient<ICompanyRepo, CompanyRepo>();
             services.AddTransient<IApplicationRepo, ApplicationRepo>();
+            services.AddTransient<IApplicationStatusRepo, ApplicationStatusRepo>();
 
             services.AddMvc();
         }
