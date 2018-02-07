@@ -12,5 +12,7 @@ namespace AppTracker.Models.Repositories.Interfaces
         bool EditApplication(int appId, Application app);
         ApplicationDTO DeleteApplication(int appId);
         bool ApplicationExists(int appId);
+        int GetTotalAppCount();
+        int GetPendingAppCount();
     }
 }

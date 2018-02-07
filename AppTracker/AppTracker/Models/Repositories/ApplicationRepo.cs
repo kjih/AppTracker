@@ -98,5 +98,23 @@ namespace AppTracker.Models.Repositories
 
             return (application == null) ? null : toAppDTO(application);
         }
+
+        public int GetTotalAppCount()
+        {
+            int count = _context.Application.Count();
+
+            return count;
+        }
+
+        public int GetPendingAppCount()
+        {
+            int count = (from a in _context.Application
+                         join s in _context.ApplicationStatus on a.Id equals s.ApplicationId
+                         where s.Active != null
+                         group a by a.Id into g
+                         select new { ApplicationId = g.Key }).Count();
+
+            return count;
+        }
     }
 }

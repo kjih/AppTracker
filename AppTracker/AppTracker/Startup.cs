@@ -6,6 +6,8 @@ using AppTracker.Models.DB;
 using Microsoft.EntityFrameworkCore;
 using AppTracker.Models.Repositories;
 using AppTracker.Models.Repositories.Interfaces;
+using AppTracker.Providers.Interfaces;
+using AppTracker.Providers;
 
 namespace AppTracker
 {
@@ -21,7 +23,7 @@ namespace AppTracker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // EF DB Setup
+            // EF Context
             services.AddDbContext<AppTrackerDBContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("AppTrackerDB")));
 
@@ -30,6 +32,9 @@ namespace AppTracker
             services.AddTransient<ICompanyRepo, CompanyRepo>();
             services.AddTransient<IApplicationRepo, ApplicationRepo>();
             services.AddTransient<IApplicationStatusRepo, ApplicationStatusRepo>();
+
+            // Providers
+            services.AddTransient<IMetricsProvider, MetricsProvider>();
 
             services.AddMvc();
         }
